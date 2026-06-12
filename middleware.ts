@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE } from "@/lib/auth";
+
+const SESSION_COOKIE = "archflow_session";
 
 const publicPaths = [
   "/login",
