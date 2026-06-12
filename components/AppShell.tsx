@@ -174,13 +174,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="mt-4 shrink-0 border-t border-white/10 pt-4">
-          <Link
+          <a
             href="/api/logout"
             className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-4 w-4" />
             Logout
-          </Link>
+          </a>
         </div>
       </aside>
 
