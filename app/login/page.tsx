@@ -1,5 +1,4 @@
 import { LockKeyhole, Sparkles } from "lucide-react";
-import { loginAction } from "@/app/actions/auth-actions";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -44,7 +43,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
           </div>
         )}
 
-        <form action={loginAction} className="space-y-4">
+        <form action="/api/login" method="post" className="space-y-4">
           <input
             name="email"
             type="email"
