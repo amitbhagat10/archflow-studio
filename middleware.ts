@@ -1,25 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE } from "@/lib/auth";
 
-const SESSION_COOKIE = "archflow_session";
+const publicPaths = [
+  "/login",
+  "/api/login",
+  "/api/logout",
+  "/api/me",
+  "/api/debug-session",
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isPublicPath =
-    pathname === "/login" ||
+  if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.startsWith("/api/logout");
-
-  if (isPublicPath) {
+    pathname.startsWith("/images") ||
+    pathname.startsWith("/icons") ||
+    publicPaths.includes(pathname)
+  ) {
     return NextResponse.next();
   }
 
-  const hasSession = request.cookies.has(SESSION_COOKIE);
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
 
-  if (!hasSession) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  if (!token) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Unauthenticated",
+        },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
