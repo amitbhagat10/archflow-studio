@@ -10,6 +10,22 @@ const publicPaths = [
   "/api/debug-session",
 ];
 
+function getBaseUrl(request: NextRequest) {
+  const envBaseUrl = process.env.APP_BASE_URL?.replace(/\/$/, "");
+
+  if (envBaseUrl) {
+    return envBaseUrl;
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const forwardedHost =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.host;
+
+  return `${forwardedProto}://${forwardedHost}`;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -36,7 +52,7 @@ export function middleware(request: NextRequest) {
       );
     }
 
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", `${getBaseUrl(request)}/`));
   }
 
   return NextResponse.next();

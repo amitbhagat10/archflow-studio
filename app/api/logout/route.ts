@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { SESSION_COOKIE } from "@/lib/auth";
 
+function getBaseUrl(request: NextRequest) {
+  const envBaseUrl = process.env.APP_BASE_URL?.replace(/\/$/, "");
+
+  if (envBaseUrl) {
+    return envBaseUrl;
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const forwardedHost =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    "localhost:3000";
+
+  return `${forwardedProto}://${forwardedHost}`;
+}
+
 export async function GET(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 
@@ -15,9 +31,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const response = NextResponse.redirect(new URL("/login", request.url), {
-    status: 303,
-  });
+  const response = NextResponse.redirect(
+    new URL("/login", `${getBaseUrl(request)}/`),
+    { status: 303 }
+  );
 
   response.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,

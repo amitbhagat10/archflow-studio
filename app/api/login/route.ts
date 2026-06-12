@@ -4,8 +4,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { SESSION_COOKIE } from "@/lib/auth";
 
+function getBaseUrl(request: NextRequest) {
+  const envBaseUrl = process.env.APP_BASE_URL?.replace(/\/$/, "");
+
+  if (envBaseUrl) {
+    return envBaseUrl;
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const forwardedHost =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    "localhost:3000";
+
+  return `${forwardedProto}://${forwardedHost}`;
+}
+
 function redirectTo(request: NextRequest, path: string) {
-  return NextResponse.redirect(new URL(path, request.url), { status: 303 });
+  return NextResponse.redirect(new URL(path, `${getBaseUrl(request)}/`), {
+    status: 303,
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -48,7 +66,11 @@ export async function POST(request: NextRequest) {
     return redirectTo(request, "/login?error=workspace");
   }
 
-  if (["cancelled", "expired", "suspended"].includes(String(user.subscription_status))) {
+  if (
+    ["cancelled", "expired", "suspended"].includes(
+      String(user.subscription_status)
+    )
+  ) {
     return redirectTo(request, "/login?error=subscription");
   }
 
@@ -87,9 +109,7 @@ export async function POST(request: NextRequest) {
     [user.id]
   );
 
-  const response = NextResponse.redirect(new URL("/", request.url), {
-    status: 303,
-  });
+  const response = redirectTo(request, "/");
 
   response.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
