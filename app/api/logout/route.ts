@@ -18,7 +18,15 @@ function getBaseUrl(request: NextRequest) {
   return `${forwardedProto}://${forwardedHost}`;
 }
 
+// GET must NOT logout because Next/link/browser prefetch can call GET routes.
 export async function GET(request: NextRequest) {
+  return NextResponse.redirect(
+    new URL("/login", `${getBaseUrl(request)}/`),
+    { status: 303 }
+  );
+}
+
+export async function POST(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 
   if (token) {

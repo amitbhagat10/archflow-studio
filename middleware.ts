@@ -7,7 +7,6 @@ const publicPaths = [
   "/api/login",
   "/api/logout",
   "/api/me",
-  "/api/debug-session",
 ];
 
 function getBaseUrl(request: NextRequest) {
